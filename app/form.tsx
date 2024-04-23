@@ -2,14 +2,9 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 import { getToken } from "./actions";
+import { TMessageResult } from "./validation";
 
-export interface FormState {
-  message: string;
-  isSuccess: boolean;
-  code: number;
-}
-
-const initialState: FormState = {
+const initialState: TMessageResult = {
   message: "",
   isSuccess: true,
   code: 0,
@@ -46,7 +41,7 @@ function Form() {
             <input
               type="text"
               name="address"
-              className=" focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 block w-full mt-1 border-gray-300 rounded-md shadow-sm"
+              className=" focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 block w-full mt-1 border-gray-300 rounded-md shadow-sm p-2"
               placeholder="Enter a valid aelf address here"
             />
           </label>
@@ -68,7 +63,7 @@ function Form() {
       </div>
       <div className="text-xs py-2">
         <p>
-          Click &quot;Get Tokens&quot; to receive the 50 ELF test token to try
+          Click &quot;Get Tokens&quot; to receive the 100 ELF test tokens to try
           out the aelf wallet.
         </p>
         <p>Note:</p>
@@ -80,7 +75,7 @@ function Form() {
             testnet.
           </li>
           <li>
-            Any test token has nothing to do with the official token and has no
+            Any test tokens has nothing to do with the official token and has no
             value. Please do not trade outside of testnet to avoid loss.
           </li>
         </ol>

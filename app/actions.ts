@@ -1,9 +1,23 @@
 "use server";
 
-import { FormState } from "./form";
+import {
+  TMessageResult,
+  addressSchema,
+  messageResultSchema,
+} from "./validation";
+import { handleError } from "./errors";
 
-export async function getToken(_prevState: FormState, formData: FormData) {
+export async function getToken(
+  _prevState: TMessageResult,
+  formData: FormData
+): Promise<TMessageResult> {
   const address = formData.get("address");
+
+  try {
+    addressSchema.parse(address);
+  } catch (err) {
+    return handleError(err);
+  }
 
   const res = await fetch(
     `https://faucet.aelf.dev/api/claim?walletAddress=${address}`,
@@ -11,9 +25,11 @@ export async function getToken(_prevState: FormState, formData: FormData) {
   );
   const json = await res.json();
 
-  return json as {
-    isSuccess: boolean;
-    code: number;
-    message: string;
-  };
+  try {
+    const result = messageResultSchema.parse(json);
+
+    return result;
+  } catch (err) {
+    return handleError(err);
+  }
 }
