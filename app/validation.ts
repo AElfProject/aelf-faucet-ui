@@ -8,4 +8,6 @@ export const messageResultSchema = z.object({
 
 export const addressSchema = z.string().min(1, { message: "Cannot be empty." });
 
+export const choiceSchema = z.enum(["Seed", "Token"]);
+
 export type TMessageResult = z.infer<typeof messageResultSchema>;

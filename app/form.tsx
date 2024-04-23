@@ -3,6 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { getToken } from "./actions";
 import { TMessageResult } from "./validation";
+import { useState } from "react";
 
 const initialState: TMessageResult = {
   message: "",
@@ -10,7 +11,7 @@ const initialState: TMessageResult = {
   code: 0,
 };
 
-function SubmitButton() {
+function SubmitButton({ isSeed }: { isSeed: boolean }) {
   const { pending } = useFormStatus();
 
   return (
@@ -21,18 +22,36 @@ function SubmitButton() {
       type="submit"
       aria-disabled={pending}
     >
-      Get Tokens
+      Get {isSeed ? "Seed" : "Tokens"}
     </button>
   );
 }
 
 function Form() {
   const [state, formAction] = useFormState(getToken, initialState);
+  const [isSeed, setIsSeed] = useState(false);
 
   return (
-    <div className="md:w-128 md:max-w-full w-full mx-auto">
+    <div className="mx-auto">
+      <label className="inline-flex items-center cursor-pointer mb-4">
+        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300 mr-2">
+          Token
+        </span>
+        <input
+          type="checkbox"
+          value="seed"
+          className="sr-only peer"
+          checked={isSeed}
+          onClick={(e) => setIsSeed(e.currentTarget.checked)}
+        />
+        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+          Seed
+        </span>
+      </label>
+
       <h1 className="text-4xl font-bold text-gray-800">
-        AElf Testnet Token Faucet
+        AElf Testnet {isSeed ? "Seed" : "Token"} Faucet
       </h1>
       <div className="sm:rounded-md p-6 border border-gray-300 my-4">
         <form action={formAction}>
@@ -45,7 +64,14 @@ function Form() {
               placeholder="Enter a valid aelf address here"
             />
           </label>
-          <SubmitButton />
+
+          <input
+            type="hidden"
+            name="choice"
+            value={isSeed ? "Seed" : "Token"}
+          />
+
+          <SubmitButton isSeed={isSeed} />
           {state.message.length > 0 ? (
             <p
               aria-live="polite"
@@ -63,20 +89,38 @@ function Form() {
       </div>
       <div className="text-xs py-2">
         <p>
-          Click &quot;Get Tokens&quot; to receive the 100 ELF test tokens to try
-          out the aelf wallet.
+          Click &quot;Get Tokens&quot; to receive the{" "}
+          {isSeed ? "test seed" : "100 ELF test tokens"} to try out the aelf
+          wallet.
         </p>
         <p>Note:</p>
         <ol className="list-decimal ml-4">
-          <li>Each aelf Wallet address can only receive test tokens once</li>
           <li>
-            The test token can be used to try out the same-chain/cross-chain
-            transfer, resource purchasing, voting, and transaction fee in aelf
-            testnet.
+            Each aelf Wallet address can only receive test{" "}
+            {isSeed ? "seed" : "tokens"} once.
           </li>
           <li>
-            Any test tokens has nothing to do with the official token and has no
-            value. Please do not trade outside of testnet to avoid loss.
+            {isSeed ? (
+              <>
+                The test seed can be used to{" "}
+                <a
+                  className="underline underline-offset-4"
+                  href="https://doc.portkey.finance/docs/QuickStartGuides/LaunchTokenAndNFTCollection/CreateTokensViaEOAAddress"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  try out token creation on aelf testnet
+                </a>
+                .
+              </>
+            ) : (
+              "The test token can be used to try out the same-chain/cross-chain transfer, resource purchasing, voting, and transaction fee in aelf testnet."
+            )}
+          </li>
+          <li>
+            Any test {isSeed ? "seed" : "tokens"} has nothing to do with the
+            official {isSeed ? "seed" : "tokens"} and has no value. Please do
+            not trade outside of testnet to avoid loss.
           </li>
         </ol>
       </div>
