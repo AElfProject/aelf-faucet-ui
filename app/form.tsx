@@ -68,8 +68,8 @@ function Form() {
       </div>
       <div className="text-xs py-2">
         <p>
-          Click &quot;Get Test Token&quot; to receive the 50 ELF test token to
-          try out the aelf wallet.
+          Click &quot;Get Tokens&quot; to receive the 50 ELF test token to try
+          out the aelf wallet.
         </p>
         <p>Note:</p>
         <ol className="list-decimal ml-4">
