@@ -60,7 +60,10 @@ function Form() {
             />
           </label>
 
-          <Select onValueChange={(e) => setChoice(e as EChoices)}>
+          <Select
+            value={choice}
+            onValueChange={(e) => setChoice(e as EChoices)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
