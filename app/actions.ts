@@ -7,6 +7,7 @@ import {
   messageResultSchema,
 } from "./validation";
 import { handleError } from "./errors";
+import { EChoices } from "./types";
 
 export async function getToken(
   _prevState: TMessageResult,
@@ -17,11 +18,15 @@ export async function getToken(
 
   try {
     const parsedAddress = addressSchema.parse(address);
-    const parsedChoice = choiceSchema.parse(choice);
+    const parsedChoice: EChoices = choiceSchema.parse(choice);
 
     const res = await fetch(
       `https://faucet.aelf.dev/api/${
-        parsedChoice === "Seed" ? "claim-seed" : "claim"
+        {
+          [EChoices.ELF]: "claim",
+          [EChoices.TOKEN]: "claim-seed",
+          [EChoices.NFT]: "claim-nft-seed",
+        }[parsedChoice]
       }?walletAddress=${parsedAddress}`,
       { method: "POST" }
     );

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EChoices } from "./types";
 
 export const messageResultSchema = z.object({
   isSuccess: z.boolean(),
@@ -8,7 +9,7 @@ export const messageResultSchema = z.object({
 
 export const addressSchema = z
   .string()
-  .min(1, { message: "Cannot be empty." })
+  .min(1, { message: "Address cannot be empty." })
   .transform((val) => {
     const splitByUnderscore = val.split("_");
     if (splitByUnderscore.length === 3) return splitByUnderscore[1];
@@ -16,6 +17,10 @@ export const addressSchema = z
     return val;
   });
 
-export const choiceSchema = z.enum(["Seed", "Token"]);
+export const choiceSchema = z.enum([
+  EChoices.ELF,
+  EChoices.NFT,
+  EChoices.TOKEN,
+]);
 
 export type TMessageResult = z.infer<typeof messageResultSchema>;

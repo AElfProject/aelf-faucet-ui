@@ -4,6 +4,18 @@ import { useFormState, useFormStatus } from "react-dom";
 import { getToken } from "./actions";
 import { TMessageResult } from "./validation";
 import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { EChoices } from "./types";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const initialState: TMessageResult = {
   message: "",
@@ -11,7 +23,7 @@ const initialState: TMessageResult = {
   code: 0,
 };
 
-function SubmitButton({ isSeed }: { isSeed: boolean }) {
+function SubmitButton({ choice }: { choice: EChoices }) {
   const { pending } = useFormStatus();
 
   return (
@@ -22,38 +34,23 @@ function SubmitButton({ isSeed }: { isSeed: boolean }) {
       type="submit"
       aria-disabled={pending}
     >
-      Get {isSeed ? "Seed" : "Tokens"}
+      Get {choice === EChoices.ELF ? "Tokens" : "Seed"}
     </button>
   );
 }
 
 function Form() {
   const [state, formAction] = useFormState(getToken, initialState);
-  const [isSeed, setIsSeed] = useState(false);
+  const [choice, setChoice] = useState<EChoices>(EChoices.ELF);
+
+  const isSeed = choice !== EChoices.ELF;
 
   return (
-    <div className="mx-auto">
-      <label className="inline-flex items-center cursor-pointer mb-4">
-        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300 mr-2">
-          Token
-        </span>
-        <input
-          type="checkbox"
-          value="seed"
-          className="sr-only peer"
-          checked={isSeed}
-          onClick={(e) => setIsSeed(e.currentTarget.checked)}
-        />
-        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-          Seed
-        </span>
-      </label>
-
+    <div className="mx-auto md:w-[800px]">
       <h1 className="text-4xl font-bold text-gray-800">
         AElf Testnet {isSeed ? "Seed" : "Token"} Faucet
       </h1>
-      <div className="sm:rounded-md p-6 border border-gray-300 my-4">
+      <div className="sm:rounded-md p-6 border border-gray-300 my-4 md:h-[500px] flex flex-col">
         <form action={formAction}>
           <label className="block mb-6">
             <span className="text-gray-700">Your aelf address</span>
@@ -65,18 +62,33 @@ function Form() {
             />
           </label>
 
-          <input
-            type="hidden"
-            name="choice"
-            value={isSeed ? "Seed" : "Token"}
-          />
+          <Select onValueChange={(e) => setChoice(e as EChoices)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>ELF Token</SelectLabel>
+                <SelectItem value={EChoices.ELF}>ELF</SelectItem>
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>Seed</SelectLabel>
+                <SelectItem value={EChoices.TOKEN}>Token Seed</SelectItem>
+                <SelectItem value={EChoices.NFT}>NFT Seed</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-          <SubmitButton isSeed={isSeed} />
+          <div className="mb-4"></div>
+
+          <input type="hidden" name="choice" value={choice} />
+
+          <SubmitButton choice={choice} />
           {state.message.length > 0 ? (
             <p
               aria-live="polite"
               role="status"
-              className={`px-4 py-3 mt-2 rounded ${
+              className={`px-4 py-3 mt-4 rounded ${
                 state?.isSuccess
                   ? "bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900"
                   : "bg-red-100 border border-red-400 text-red-700"
@@ -86,43 +98,43 @@ function Form() {
             </p>
           ) : null}
         </form>
-      </div>
-      <div className="text-xs py-2">
-        <p>
-          Click &quot;Get Tokens&quot; to receive the{" "}
-          {isSeed ? "test seed" : "100 ELF test tokens"} to try out the aelf
-          wallet.
-        </p>
-        <p>Note:</p>
-        <ol className="list-decimal ml-4">
-          <li>
-            Each aelf Wallet address can only receive test{" "}
-            {isSeed ? "seed" : "tokens"} once.
-          </li>
-          <li>
-            {isSeed ? (
-              <>
-                The test seed can be used to{" "}
-                <a
-                  className="underline underline-offset-4"
-                  href="https://doc.portkey.finance/docs/QuickStartGuides/LaunchTokenAndNFTCollection/CreateTokensViaEOAAddress"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  try out token creation on aelf testnet
-                </a>
-                .
-              </>
-            ) : (
-              "The test token can be used to try out the same-chain/cross-chain transfer, resource purchasing, voting, and transaction fee in aelf testnet."
-            )}
-          </li>
-          <li>
-            Any test {isSeed ? "seed" : "tokens"} has nothing to do with the
-            official {isSeed ? "seed" : "tokens"} and has no value. Please do
-            not trade outside of testnet to avoid loss.
-          </li>
-        </ol>
+        <div className="text-sm py-2 mt-auto">
+          <p>
+            Click &quot;Get {isSeed ? "Seed" : "Tokens"}&quot; to receive the{" "}
+            {isSeed ? "test seed" : "100 ELF test tokens"} to try out the aelf
+            wallet.
+          </p>
+          <p>Note:</p>
+          <ol className="list-decimal ml-4">
+            <li>
+              Each aelf Wallet address can only receive test{" "}
+              {isSeed ? "seed" : "tokens"} once.
+            </li>
+            <li>
+              {isSeed ? (
+                <>
+                  The test seed can be used to{" "}
+                  <a
+                    className="underline underline-offset-4"
+                    href="https://doc.portkey.finance/docs/QuickStartGuides/LaunchTokenAndNFTCollection/CreateTokensViaEOAAddress"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    try out token creation on aelf testnet
+                  </a>
+                  .
+                </>
+              ) : (
+                "The test token can be used to try out the same-chain/cross-chain transfer, resource purchasing, voting, and transaction fee in aelf testnet."
+              )}
+            </li>
+            <li>
+              Any test {isSeed ? "seed" : "tokens"} has nothing to do with the
+              official {isSeed ? "seed" : "tokens"} and has no value. Please do
+              not trade outside of testnet to avoid loss.
+            </li>
+          </ol>
+        </div>
       </div>
     </div>
   );
