@@ -57,7 +57,6 @@ function Form() {
 
   // Handle reCAPTCHA verification
   const onReCAPTCHAChange = (token: string | null) => {
-    console.log("token", token);
     if (token) {
       setIsCaptchaVerified(true);
       setCaptchaToken(token);
@@ -65,8 +64,6 @@ function Form() {
       setIsCaptchaVerified(false);
     }
   };
-
-  console.log("recaptchaRef", recaptchaRef);
 
   return (
     <div className="mx-auto md:w-[800px]">
