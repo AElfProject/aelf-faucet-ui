@@ -21,7 +21,7 @@ export async function getToken(
     const parsedAddress = addressSchema.parse(address);
     const parsedChoice: EChoices = choiceSchema.parse(choice);
     const res = await fetch(
-      `http://localhost:8801/api/${
+      `https://faucet.aelf.dev/api/${
         {
           [EChoices.ELF]: "claim",
           [EChoices.TOKEN]: "claim-seed",
