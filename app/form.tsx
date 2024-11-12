@@ -3,7 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { getToken } from "./actions";
 import { TMessageResult } from "./validation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { EChoices } from "./types";
 import {
   Select,
@@ -14,6 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ReCAPTCHA from "react-google-recaptcha"; // Import reCAPTCHA
+
+const GOOGLE_CAPTCH_SITEKEY = "6LcovGQqAAAAAM7XGg4LijV20JucjYa1sum0oU_k";
 
 const initialState: TMessageResult = {
   message: "",
@@ -21,16 +24,22 @@ const initialState: TMessageResult = {
   code: 0,
 };
 
-function SubmitButton({ choice }: { choice: EChoices }) {
+function SubmitButton({
+  choice,
+  isCaptchaVerified,
+}: {
+  choice: EChoices;
+  isCaptchaVerified: boolean;
+}) {
   const { pending } = useFormStatus();
 
   return (
     <button
       className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-        pending ? "opacity-50 cursor-not-allowed" : ""
+        pending || !isCaptchaVerified ? "opacity-50 cursor-not-allowed" : ""
       }`}
       type="submit"
-      aria-disabled={pending}
+      aria-disabled={pending || !isCaptchaVerified}
     >
       Get {choice === EChoices.ELF ? "Tokens" : "Seed"}
     </button>
@@ -40,15 +49,28 @@ function SubmitButton({ choice }: { choice: EChoices }) {
 function Form() {
   const [state, formAction] = useFormState(getToken, initialState);
   const [choice, setChoice] = useState<EChoices>(EChoices.ELF);
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const isSeed = choice !== EChoices.ELF;
+
+  // Handle reCAPTCHA verification
+  const onReCAPTCHAChange = (token: string | null) => {
+    if (token) {
+      setIsCaptchaVerified(true);
+      setCaptchaToken(token);
+    } else {
+      setIsCaptchaVerified(false);
+    }
+  };
 
   return (
     <div className="mx-auto md:w-[800px]">
       <h1 className="text-4xl font-bold text-gray-800">
         AElf Testnet {isSeed ? "Seed" : "Token"} Faucet
       </h1>
-      <div className="sm:rounded-md p-6 border border-gray-300 my-4 md:h-[500px] flex flex-col">
+      <div className="sm:rounded-md p-6 border border-gray-300 my-4 md:min-h-[500px] flex flex-col">
         <form action={formAction}>
           <label className="block mb-6">
             <span className="text-gray-700">Your aelf address</span>
@@ -62,7 +84,11 @@ function Form() {
 
           <Select
             value={choice}
-            onValueChange={(e) => setChoice(e as EChoices)}
+            onValueChange={(e) => {
+              setChoice(e as EChoices);
+              recaptchaRef && recaptchaRef.current?.reset();
+              setIsCaptchaVerified(false);
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
@@ -83,8 +109,17 @@ function Form() {
           <div className="mb-4"></div>
 
           <input type="hidden" name="choice" value={choice} />
+          <input type="hidden" name="captchaToken" value={captchaToken} />
 
-          <SubmitButton choice={choice} />
+          {/* Add Google reCAPTCHA */}
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={GOOGLE_CAPTCH_SITEKEY} // Replace with your reCAPTCHA site key
+            onChange={onReCAPTCHAChange}
+            className="mb-3"
+          />
+
+          <SubmitButton choice={choice} isCaptchaVerified={isCaptchaVerified} />
           {state.message.length > 0 ? (
             <p
               aria-live="polite"
